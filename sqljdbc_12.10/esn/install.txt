@@ -1,0 +1,39 @@
+Instrucciones de instalación
+Microsoft JDBC Driver 12.10 para SQL Server
+
+
+INTRODUCCIÓN
+------------
+A continuación se incluyen las instrucciones para desempaquetar sqljdbc_<versión>_enu.zip y 
+sqljdbc_<versión>_enu.tar.gz.
+
+
+WINDOWS
+-------
+1. Lea el archivo license.txt. La descarga y el uso de Microsoft JDBC Driver 12.10 para SQL Server implican la aceptación de esta licencia.
+
+2. Descargue sqljdbc_<versión>_enu.zip en un directorio temporal.
+
+3. Extraiga sqljdbc_<versión>_enu.zip.
+
+4. Cuando se le solicite, indique un directorio para realizar la extracción; se recomienda desempaquetar
+   este archivo ZIP en %ProgramFiles%, en el directorio predeterminado, que es el siguiente:
+
+	Microsoft JDBC DRIVER 12.10 para SQL Server
+
+
+UNIX
+----
+1. Lea el archivo license.txt. La descarga y el uso de Microsoft JDBC Driver 12.10 para SQL Server implican la aceptación de esta licencia.
+
+2. Descargue sqljdbc_<versión>_enu.tar.gz en un directorio temporal.
+
+3. Para desempaquetar el archivo TAR comprimido, vaya al directorio donde
+   quiera desempaquetar el controlador y escriba lo siguiente:
+
+	gzip -d sqljdbc_<versión>_enu.tar.gz
+
+4. Para desempaquetar el archivo TAR, vaya al directorio donde quiera 
+   instalar el controlador y escriba lo siguiente:
+
+	tar -xf sqljdbc_<versión>_enu.tar

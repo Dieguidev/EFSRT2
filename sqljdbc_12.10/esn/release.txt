@@ -1,0 +1,185 @@
+Información de la versión
+Microsoft JDBC Driver 12.10 para SQL Server
+
+------------
+INTRODUCCIÓN
+------------
+Este archivo contiene información importante o de última hora que complementa a Microsoft JDBC. 
+Documentación de Driver 12.10 para SQL Server. Debe leer este archivo en su totalidad antes de instalar 
+el controlador JDBC.
+
+Sus comentarios son muy importantes y haremos lo posible para responderle puntualmente 
+. Para más información sobre cómo proporcionar comentarios mediante los blogs y los foros en línea del controlador JDBC, 
+consulte la página de Microsoft JDBC Driver 12.10 para SQL Server, disponible en https://aka.ms/mssql-jdbc-feedback.
+
+
+------------
+INSTALACIÓN
+------------
+Las instrucciones para instalar el controlador JDBC se encuentran en install.txt. Consulte este archivo para 
+obtener información sobre cómo instalar el controlador JDBC en los sistemas operativos Windows, Linux y macOS.
+
+
+---------------------------
+SISTEMAS OPERATIVOS ADMITIDOS
+---------------------------
+Sistemas operativos compatibles con Microsoft JDBC Driver 12.10 para SQL Server:
+  Windows Server 2012
+  Windows Server 2012 R2
+  Windows Server 2016
+  Windows Server 2019
+  Windows Server 2022
+  Windows 8.1
+  Windows 10
+  Windows 11
+  Linux
+  macOS
+
+Esta lista es un ejemplo de algunos de los sistemas operativos admitidos. El controlador JDBC está diseñado 
+para funcionar en cualquier sistema operativo que admita el uso de una máquina virtual Java (JVM). 
+
+Sin embargo, solo en los sistemas operativos Linux y macOS más recientes (Ubuntu 20.04, Ubuntu 18.04, CentOS 7, SUSE 12 y
+ macOS 11) se han realizado pruebas de compatibilidad y soporte técnico.
+
+
+-----------------------
+VERSIONES DE JAVA COMPATIBLES
+-----------------------
+Microsoft JDBC Driver 12.10 para SQL Server se ha probado y es compatible con las versiones más recientes de 
+las compilaciones de kit de desarrollo de Java (JDK) de Open JDK y Zulu admitidas en los sistemas operativos mencionados anteriormente.
+Se admiten las siguientes versiones de la familia de bibliotecas del sistema de Java Runtime Environment (JRE):
+
+  ----------------------------------------------------------------------
+  Versión de la familia JRE | JAR de Driver para una compatibilidad óptima
+  ----------------------------------------------------------------------
+  8 y versiones posteriores                 | mssql-jdbc-12.10.1.jre8.jar
+  11 y versiones posteriores                | mssql-jdbc-12.10.1.jre11.jar
+
+
+----------------
+CONTENIDO DE LA VERSIÓN
+----------------
+El archivo .zip o .tar de Microsoft JDBC Driver 12.10 para SQL Server desempaqueta los siguientes archivos 
+en las ubicaciones especificadas, relativas al directorio de instalación:
+
+<directorio de instalación>\sqljdbc_<versión>\<idioma>\install.txt
+<directorio de instalación>\sqljdbc_<versión>\<idioma>\release.txt
+<directorio de instalación>\sqljdbc_<versión>\<idioma>\license.txt
+<directorio de instalación>\sqljdbc_<versión>\<idioma>\thirdpartynotices.txt
+<directorio de instalación>\sqljdbc_<versión>\<idioma>\mssql-jdbc-12.10.1.jre8.jar
+<directorio de instalación>\sqljdbc_<versión>\<idioma>\mssql-jdbc-12.10.1.jre11.jar
+<directorio de instalación>\sqljdbc_<versión>\<idioma>\auth\x86\mssql-jdbc_auth-12.10.1.x86.dll
+<directorio de instalación>\sqljdbc_<versión>\<idioma>\auth\x64\mssql-jdbc_auth-12.10.1.x64.dll
+<directorio de instalación>\sqljdbc_<versión>\<idioma>\samples\<archivos de ejemplo...>
+<directorio de instalación>\sqljdbc_<versión>\<idioma>\xa\xa_install.sql
+<directorio de instalación>\sqljdbc_<versión>\<idioma>\xa\x86\sqljdbc_xa.dll
+<directorio de instalación>\sqljdbc_<versión>\<idioma>\xa\x64\sqljdbc_xa.dll
+
+Para obtener información detallada sobre cada componente, consulte la documentación en línea,
+Documentación de Microsoft JDBC Driver para SQL Server: https://aka.ms/mssql-jdbc
+
+
+-------------
+DOCUMENTACIÓN
+-------------
+En este paquete se incluye la información de versión, las instrucciones de instalación y los términos de licencia. 
+El resto de la documentación se puede encontrar en línea.
+
+Tenga en cuenta que los archivos de ayuda sin conexión se han suspendido. 
+
+
+---------
+ARCHIVOS .JAR
+---------
+Para permitir la compatibilidad con versiones anteriores y posibles casos de actualización, JDBC Driver 12.10 incluye 
+tres bibliotecas de clases JAR en cada paquete de instalación:
+	mssql-jdbc-12.10.1.jre8.jar
+	mssql-jdbc-12.10.1.jre11.jar
+
+
+----------------------
+ARCHIVOS DE CARACTERÍSTICAS ESPECÍFICAS
+----------------------
+Se incluyen componentes de Azure Active Directory y autenticación integrada (en Windows) 
+en el directorio "auth".
+
+Se incluyen componentes de transacciones distribuidas de JDBC en el directorio "xa".
+
+
+--------------------
+DEPENDENCIAS DE CARACTERÍSTICAS
+--------------------
+Algunas características de Microsoft JDBC Driver 12.10 para SQL Server dependen de bibliotecas externas, 
+como se muestra a continuación:
+
+1. Uso de "Always Encrypted" con Azure Key Vault Provider
+   Bibliotecas dependientes: azure-keyvault (versión 4.5.1) y azure-identity (versión 1.7.0-beta.2)
+
+2. Uso de "Always Encrypted con enclaves seguros"
+   Bibliotecas dependientes: com.google.code.gson (versión 2.8.9)
+   y org.bouncycastle (versión 1.70). org.bouncycastle solo es necesario para JDK 8.
+   
+3. Uso de "Autenticación de Azure Active Directory" en sistemas operativos Windows, Linux y macOS
+   Bibliotecas dependientes: azure-identity (versión 1.7.0-beta.2)
+   
+4. Uso de "useFmtOnly" para recuperar metadatos de parámetros
+   Bibliotecas dependientes: antlr-runtime (versión 4.9.3)
+   
+En el vínculo siguiente encontrará información detallada sobre cómo incluir estas bibliotecas dependientes en una aplicación de Java estándar 
+o una aplicación de Maven: https://go.microsoft.com/fwlink/?linkid=867575
+
+-------
+SAMPLES
+-------
+Se incluyen aplicaciones de ejemplo que muestran diversas características de JDBC Driver en el directorio
+"samples". Para más información sobre cada ejemplo y cómo ejecutarlo, consulte la documentación 
+en línea.
+
+
+-----------
+LISTA DE CAMBIOS
+-----------
+Para ver una lista detallada de los cambios, las correcciones y las mejoras efectuadas en cada versión, consulte https://aka.ms/mssql-jdbc-release-notes.
+
+------------
+PROBLEMAS CONOCIDOS
+------------
+Estos son los problemas conocidos de Microsoft JDBC Driver 12.10 para SQL Server:
+
+1) QUITAR CONEXIONES CON SQL AZURE
+
+Al conectarse a SQL Azure, un componente de red podría terminar las conexiones inactivas (como un 
+firewall) después de un período de inactividad. Para evitar la eliminación de las conexiones inactivas por un componente de red, 
+se debe establecer la siguiente configuración del Registro (o sus equivalentes que no son de Windows) en 
+el sistema operativo donde está cargado el controlador:
+           
+Configuración del Registro                                                                   Valor recomendado
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\KeepAliveTime            30000
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\KeepAliveInterval         1000
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\TcpMaxDataRetransmission  10
+
+2) USO DE TVP CON SQL_VARIANT 
+
+2.a) PARA VALORES DE FECHA
+
+Al usar TVP para rellenar una tabla que contiene los valores de datetime/smalldatetime/date almacenados en la columna sql_variant, 
+las llamadas a getDateTime()/getSmallDateTime()/getDate() en ResultSet no funcionan y producen la excepción siguiente:
+
+	java.lang.String no se puede convertir en java.sql.Timestamp
+
+Solución alternativa: use getString() o getObject() en su lugar.
+
+2.b) USO DE TVP CON SQL_VARIANT PARA VALORES NULL
+
+Si usa TVP para rellenar una tabla y envía un valor NULL al tipo de columna sql_variant, encontrará
+una excepción dado que actualmente no se admite la inserción del valor NULL con el tipo de columna sql_variant en TVP.
+
+
+3) AL USAR LA AUTENTICACIÓN NTLM
+
+Actualmente, no se permite habilitar la protección ampliada y las conexiones cifradas al mismo tiempo.
+
+(4) AL USAR useFmtOnly
+
+Hay algunos problemas con esta característica; su causa son las deficiencias en la lógica de análisis de SQL.
+Vea https://aka.ms/mssql-jdbc-usefmtonly para obtener más información y sugerencias de soluciones alternativas.
