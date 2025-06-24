@@ -7,11 +7,14 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import arreglo.Materiales;
 import clases.Material;
+import dao.MaterialDAO;
+
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JSeparator;
 import java.awt.event.ActionListener;
+import java.util.List;
 import java.awt.event.ActionEvent;
 
 public class DlgConsultaPorProveedor extends JDialog {
@@ -90,14 +93,11 @@ public class DlgConsultaPorProveedor extends JDialog {
 	}
 	void cargarProveedores() {
 	    cmbProveedor.removeAllItems();
-	    java.util.HashSet<String>proveedoresUnicos = new java.util.HashSet<String>();
-	    for (int i = 0; i<arregloMateriales.tamaño(); i++) {
-	       String proveedor = arregloMateriales.obtener(i).getProveedor();
-	       if(!proveedoresUnicos.contains(proveedor)) {
-		    	proveedoresUnicos.add(proveedor);
-		    	cmbProveedor.addItem(proveedor);
-		    }
+	    MaterialDAO dao = new MaterialDAO();
+	    for (String proveedor : dao.obtenerProveedoresUnicos()) {
+	        cmbProveedor.addItem(proveedor);
 	    }
+
 	   
 	}
 	
@@ -105,15 +105,18 @@ public class DlgConsultaPorProveedor extends JDialog {
 		public void actionPerformed(ActionEvent e) {
 			
 			String selecProveedor = (String)cmbProveedor.getSelectedItem();
-			Material material = null;
-			DefaultTableModel modelo = (DefaultTableModel) tblResultadosMaterial.getModel();
-            modelo.setRowCount(0);
-			for(int i = 0; i<arregloMateriales.tamaño();i++) {
-				material = arregloMateriales.obtener(i);
-				if(selecProveedor.equals(material.getProveedor())) {
-		               imprimirDatos(material);
-				}
-			}
+			MaterialDAO dao = new MaterialDAO();
+		    List<Material> lista = dao.listarMateriales(); // podrías tener también un método que haga SELECT WHERE ProvMat = ?
+
+		    DefaultTableModel modelo = (DefaultTableModel) tblResultadosMaterial.getModel();
+		    modelo.setRowCount(0);
+
+		    for (Material material : lista) {
+		        if (material.getProveedor().equalsIgnoreCase(selecProveedor)) {
+		            imprimirDatos(material);
+		        }
+		    }
+
 			
 			
 		}

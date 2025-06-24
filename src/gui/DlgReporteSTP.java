@@ -4,7 +4,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import clases.Material;
-import clases.MaterialDAO;
+import dao.MaterialDAO;
 
 import java.util.*;
 
