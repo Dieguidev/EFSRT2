@@ -5,8 +5,9 @@ import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
-import arreglo.Materiales;
 import clases.Material;
+import dao.MaterialDAO;
+
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -19,7 +20,7 @@ public class DlgConsultaPorUnidMedida extends JDialog {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Materiales arregloMateriales = MenuPrincipal.DatosCompartidos.materiales;
+
 	private JTable tblResultadosMaterial;
 	private JButton btnConsultar;
 	private JLabel lblTipoMaterial;
@@ -95,25 +96,25 @@ public class DlgConsultaPorUnidMedida extends JDialog {
 		tcm.getColumn(7).setPreferredWidth(anchoColumna(4));  // hora
 	}
 	void cargarUnidadMedida() {
-		cmbUnidMed.removeAllItems();
-	    for (String unidadMedida : unidadesDeMedida) {
-	    	cmbUnidMed.addItem(unidadMedida);
+	    cmbUnidMed.removeAllItems();
+	    MaterialDAO dao = new MaterialDAO();
+	    for (String unidad : dao.obtenerUnidadesUnicas()) {
+	        cmbUnidMed.addItem(unidad);
 	    }
 	}
+
 	private class BtnConsultarActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			
 			String selecUnidadMedida = (String)cmbUnidMed.getSelectedItem();
-			Material material = null;
 			DefaultTableModel modelo = (DefaultTableModel) tblResultadosMaterial.getModel();
             modelo.setRowCount(0);
             
-			for(int i = 0; i<arregloMateriales.tamaño();i++) {
-				material = arregloMateriales.obtener(i);
-				if(selecUnidadMedida.equals(material.getUnidadMedida())) {
-		               imprimirDatos(material);
-				}
-			}	
+            MaterialDAO dao = new MaterialDAO();
+            for (Material m : dao.listarPorUnidad(selecUnidadMedida)) {
+                imprimirDatos(m);
+            }
+
 		}
 	}
 	private void imprimirDatos(Material material) {

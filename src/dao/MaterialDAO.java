@@ -133,6 +133,60 @@ public class MaterialDAO {
 
 	    return lista;
 	}
+	
+	
+	public List<String> obtenerUnidadesUnicas() {
+	    List<String> unidades = new ArrayList<>();
+	    String sql = "SELECT DISTINCT UnidMed FROM dbo.COMP_MATERIALES ORDER BY UnidMed";
+
+	    try (Connection con = ConexionSQL.conectar();
+	         PreparedStatement ps = con.prepareStatement(sql);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        while (rs.next()) {
+	            unidades.add(rs.getString("UnidMed"));
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return unidades;
+	}
+
+
+	
+	public List<Material> listarPorUnidad(String unidad) {
+	    List<Material> lista = new ArrayList<>();
+	    String sql = "SELECT CodMat, NomMat, TipMat, ProvMat, CantMat, Color, Fecha, Hora, UnidMed FROM dbo.COMP_MATERIALES WHERE UnidMed = ?";
+
+	    try (Connection con = ConexionSQL.conectar();
+	         PreparedStatement ps = con.prepareStatement(sql)) {
+
+	        ps.setString(1, unidad);
+	        ResultSet rs = ps.executeQuery();
+
+	        while (rs.next()) {
+	            Material m = new Material(
+	                rs.getString("CodMat"),
+	                rs.getString("NomMat"),
+	                rs.getString("TipMat"),
+	                rs.getString("Color"),
+	                rs.getString("UnidMed"),
+	                rs.getInt("CantMat"),
+	                rs.getString("ProvMat"),
+	                rs.getString("Fecha"),
+	                rs.getString("Hora")
+	            );
+	            lista.add(m);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return lista;
+	}
 
 
 }
