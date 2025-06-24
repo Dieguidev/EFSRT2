@@ -115,6 +115,8 @@ public class DlgConsultaPorProveedor extends JDialog {
 		        if (material.getProveedor().equalsIgnoreCase(selecProveedor)) {
 		            imprimirDatos(material);
 		        }
+		        
+		        
 		    }
 
 			
