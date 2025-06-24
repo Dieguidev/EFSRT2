@@ -81,5 +81,58 @@ public class MaterialDAO {
 	    return proveedores;
 	}
 
+	
+	public List<String> obtenerColoresUnicos() {
+	    List<String> colores = new ArrayList<>();
+	    String sql = "SELECT DISTINCT Color FROM dbo.COMP_MATERIALES ORDER BY Color";
+
+	    try (Connection con = ConexionSQL.conectar();
+	         PreparedStatement ps = con.prepareStatement(sql);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        while (rs.next()) {
+	            colores.add(rs.getString("Color"));
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return colores;
+	}
+	
+	
+	public List<Material> listarPorColor(String color) {
+	    List<Material> lista = new ArrayList<>();
+	    String sql = "SELECT CodMat, NomMat, TipMat,Color, ProvMat, UnidMed, CantMat, Fecha, Hora FROM dbo.COMP_MATERIALES WHERE Color = ?";
+
+	    try (Connection con = ConexionSQL.conectar();
+	         PreparedStatement ps = con.prepareStatement(sql)) {
+
+	        ps.setString(1, color);
+	        ResultSet rs = ps.executeQuery();
+
+	        while (rs.next()) {
+	            Material m = new Material(
+	                rs.getString("CodMat"),
+	                rs.getString("NomMat"),
+	                rs.getString("TipMat"),
+	                rs.getString("Color"),
+	                rs.getString("UnidMed"),
+	                rs.getInt("CantMat"),
+	                rs.getString("ProvMat"),
+	                rs.getString("Fecha"),
+	                rs.getString("Hora")
+	            );
+	            lista.add(m);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return lista;
+	}
+
 
 }

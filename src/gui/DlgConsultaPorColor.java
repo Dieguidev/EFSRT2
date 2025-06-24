@@ -5,8 +5,9 @@ import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
-import arreglo.Materiales;
 import clases.Material;
+import dao.MaterialDAO;
+
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -19,7 +20,6 @@ public class DlgConsultaPorColor extends JDialog {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Materiales arregloMateriales = MenuPrincipal.DatosCompartidos.materiales;
 	private JTable tblResultadosMaterial;
 	private JButton btnConsultar;
 	private JLabel lblColorMaterial;
@@ -89,31 +89,25 @@ public class DlgConsultaPorColor extends JDialog {
 		tcm.getColumn(7).setPreferredWidth(anchoColumna(4));  // hora
 	}
 	void cargarColores() {
-		cmbColorMaterial.removeAllItems();
-	    java.util.HashSet<String>coloresUnicos = new java.util.HashSet<String>();
-	    for (int i = 0; i<arregloMateriales.tamaño(); i++) {
-	       String color = arregloMateriales.obtener(i).getColor();
-	       if(!coloresUnicos.contains(color)) {
-	    	   coloresUnicos.add(color);
-		    	cmbColorMaterial.addItem(color);
-		    }
+	    cmbColorMaterial.removeAllItems();
+	    MaterialDAO dao = new MaterialDAO();
+	    for (String color : dao.obtenerColoresUnicos()) {
+	        cmbColorMaterial.addItem(color);
 	    }
-	   
 	}
+
 	
 	private class BtnConsultarActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			
 			String selecColor = (String)cmbColorMaterial.getSelectedItem();
-			Material material = null;
 			DefaultTableModel modelo = (DefaultTableModel) tblResultadosMaterial.getModel();
              modelo.setRowCount(0);
-			for(int i = 0; i<arregloMateriales.tamaño();i++) {
-				material = arregloMateriales.obtener(i);
-				if(selecColor.equals(material.getColor())) {
-		               imprimirDatos(material);
-				}
-			}
+             MaterialDAO dao = new MaterialDAO();
+             for (Material m : dao.listarPorColor(selecColor)) {
+                 imprimirDatos(m);
+             }
+
 
 		}
 	}
