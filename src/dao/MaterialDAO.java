@@ -49,7 +49,7 @@ public class MaterialDAO {
 
 	        if (rs.next()) {
 	            String ultimo = rs.getString("CodMat"); // ejemplo: MAT025
-	            int numero = Integer.parseInt(ultimo.substring(3)); // 25
+	            int numero = Integer.parseInt(ultimo.substring(3).trim()); // 25
 	            numero++; // 26
 	            nuevoCodigo = String.format("MAT%03d", numero); // MAT026
 	        }
@@ -187,6 +187,52 @@ public class MaterialDAO {
 
 	    return lista;
 	}
+	
+	
+	public boolean insertarMaterial(Material m) {
+	    String sql = "INSERT INTO dbo.COMP_MATERIALES (CodMat, NomMat, TipMat, Color, UnidMed, CantMat, ProvMat, Fecha, Hora) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+	    try (Connection con = ConexionSQL.conectar();
+	         PreparedStatement ps = con.prepareStatement(sql)) {
+
+	        ps.setString(1, m.getCodigoMaterial());
+	        ps.setString(2, m.getNombreMaterial());
+	        ps.setString(3, m.getTipoMaterial());
+	        ps.setString(4, m.getColor());
+	        ps.setString(5, m.getUnidadMedida());
+	        ps.setInt(6, m.getCantidad());
+	        ps.setString(7, m.getProveedor());
+	        ps.setString(8, m.getFecha());
+	        ps.setString(9, m.getHora());
+
+	        return ps.executeUpdate() > 0;
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+	}
+	
+	
+	public List<String> obtenerTiposMaterial() {
+	    List<String> tipos = new ArrayList<>();
+	    String sql = "SELECT DISTINCT TipMat FROM dbo.COMP_MATERIALES ORDER BY TipMat";
+
+	    try (Connection con = ConexionSQL.conectar();
+	         PreparedStatement ps = con.prepareStatement(sql);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        while (rs.next()) {
+	            tipos.add(rs.getString("TipMat"));
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return tipos;
+	}
+
 
 
 }

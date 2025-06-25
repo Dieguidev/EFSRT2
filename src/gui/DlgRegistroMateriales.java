@@ -1,8 +1,9 @@
 package gui;
 
 
-import arreglo.Materiales;
+
 import clases.Material;
+import dao.MaterialDAO;
 import gui.MenuPrincipal.DatosCompartidos;
 import java.awt.EventQueue;
 import javax.swing.JButton;
@@ -154,7 +155,7 @@ public class DlgRegistroMateriales extends JDialog implements ActionListener {
 		txtCantidad.setBounds(146, 135, 52, 23);
 		getContentPane().add(txtCantidad);
 		
-		txtCodigoMaterial.setText("" + material.codigoMaterial());
+		txtCodigoMaterial.setText(new MaterialDAO().generarNuevoCodigoMaterial());
 	    
 		lblFecha = new JLabel("Fecha:");
 		lblFecha.setBounds(10, 184, 110, 23);
@@ -177,13 +178,11 @@ public class DlgRegistroMateriales extends JDialog implements ActionListener {
 		getContentPane().add(txtHora);
 		
 		cmbTipoMaterial = new JComboBox<String>();
-		cmbTipoMaterial.setModel(new DefaultComboBoxModel<String>(new String[] {
-				 "Materia prima textil", 
-			        "Insumos auxiliares", 
-			        "Empaque y etiqueta", 
-			        "Químicos", 
-			        "Herramientas"
-		}));
+		cmbTipoMaterial.removeAllItems();
+		for (String tipo : new MaterialDAO().obtenerTiposMaterial()) {
+		    cmbTipoMaterial.addItem(tipo);
+		}
+
 		cmbTipoMaterial.setBounds(146, 60, 190, 22);
 		getContentPane().add(cmbTipoMaterial);
 	
@@ -195,13 +194,13 @@ public class DlgRegistroMateriales extends JDialog implements ActionListener {
 				"Lt."
 		}));
 		cmbUnidadMedida.setBounds(146, 160, 94, 22);
+		cargarUnidadesDesdeBase();
 		getContentPane().add(cmbUnidadMedida);
 		ajustarAnchoColumnas();
 		listar();	
 		}
 	
 	//  Declaración global
-	Materiales material = DatosCompartidos.materiales;
 	private JTextField txtCantidad;
 	private JLabel lblFecha;
 	private JTextField txtFecha;
@@ -218,6 +217,10 @@ public class DlgRegistroMateriales extends JDialog implements ActionListener {
 	}
 	
 	protected void actionPerformedBtnAdicionar(ActionEvent arg0) {
+		if (!validarCamposObligatorios()) {
+	        return;
+	    }
+
 		try { 
 		    adicionarMaterial();
 		    listar();
@@ -225,6 +228,14 @@ public class DlgRegistroMateriales extends JDialog implements ActionListener {
 		    error("Error al adicionar material: " + e.getMessage(), txtNombreMaterial);
 		}
 	}
+	
+	void cargarUnidadesDesdeBase() {
+	    cmbUnidadMedida.removeAllItems();
+	    for (String unidad : new MaterialDAO().obtenerUnidadesUnicas()) {
+	        cmbUnidadMedida.addItem(unidad);
+	    }
+	}
+
 	//  Métodos tipo void (sin parámetros)
 	void ajustarAnchoColumnas() {
 		TableColumnModel tcm = tblPersona.getColumnModel();
@@ -239,93 +250,94 @@ public class DlgRegistroMateriales extends JDialog implements ActionListener {
 		tcm.getColumn(8).setPreferredWidth(anchoColumna(4));  // Hora
 	}
 	void listar() {
-		Material m;
-		modelo.setRowCount(0);
-		for (int i=0; i<material.tamaño(); i++) {
-			m = material.obtener(i);
-			Object[] fila = { m.getCodigoMaterial(),
-					          m.getNombreMaterial(),
-					          m.getColor(),
-					          m.getTipoMaterial(),
-					          m.getProveedor(),
-					          m.getUnidadMedida(),
-					          m.getCantidad(),
-					          m.getFecha(),
-					          m.getHora()
-					 
-					         };
-			modelo.addRow(fila);
-		}
+	    modelo.setRowCount(0);
+	    MaterialDAO dao = new MaterialDAO();
+	    for (Material m : dao.listarMateriales()) {
+	        Object[] fila = {
+	            m.getCodigoMaterial(),
+	            m.getNombreMaterial(),
+	            m.getColor(),
+	            m.getTipoMaterial(),
+	            m.getProveedor(),
+	            m.getUnidadMedida(),
+	            m.getCantidad(),
+	            m.getFecha(),
+	            m.getHora()
+	        };
+	        modelo.addRow(fila);
+	    }
 	}
-	void adicionarMaterial() {
-	    String codigo = leerCodigoMaterial();
-	    String nombreMaterial = leerNombreMaterial();
-	    String tipoMaterial = leerTipoMaterial();
-	    String color = leerColor();
-	    String unidadMedida = leerUnidadMedida();
-	    String fecha = obtenerFecha();
-	    String hora = obtenerHora();
-	    int cantidad = leerCantidad();
-	    String proveedor = leerProveedor();
-	    
-	    if(leerTipoMaterial().equals("Materia prima textil") && (leerUnidadMedida().equals("Unid.") || leerUnidadMedida().equals("Lt."))){
-	    	JOptionPane.showMessageDialog(
-	    			this,
-	    			"Unidad de mediad invalida segun el tipo de material",
-	    			"ERROR",
-	    			JOptionPane.ERROR_MESSAGE
-	    			);
-	    	return;
-	    }else if(leerTipoMaterial().equals("Insumos auxiliares") && (leerUnidadMedida().equals("Kg.") || leerUnidadMedida().equals("Cm."))){
-	    	JOptionPane.showMessageDialog(
-	    			this,
-	    			"Unidad de mediad invalida segun el tipo de material",
-	    			"ERROR",
-	    			JOptionPane.ERROR_MESSAGE
-	    			);
-	    	return;
-	    }else if(leerTipoMaterial().equals("Empaque y etiqueta") && (leerUnidadMedida().equals("Kg.") || leerUnidadMedida().equals("Cm.") ||leerUnidadMedida().equals("Lt."))){
-	    	JOptionPane.showMessageDialog(
-	    			this,
-	    			"Unidad de mediad invalida segun el tipo de material",
-	    			"ERROR",
-	    			JOptionPane.ERROR_MESSAGE
-	    			);
-	    	return;
+	
+	void limpiarCampos() {
+	    txtNombreMaterial.setText("");
+	    txtColor.setText("");
+	    txtProveedor.setText("");
+	    txtCantidad.setText("");
+	    txtFecha.setText(obtenerFecha());
+	    txtHora.setText(obtenerHora());
+	    cmbTipoMaterial.setSelectedIndex(0);
+	    cmbUnidadMedida.setSelectedIndex(0);
+	}
 
-	    }else if(leerTipoMaterial().equals("Químicos") && (leerUnidadMedida().equals("Kg.") || leerUnidadMedida().equals("Cm."))){
-	    	JOptionPane.showMessageDialog(
-	    			this,
-	    			"Unidad de mediad invalida segun el tipo de material",
-	    			"ERROR",
-	    			JOptionPane.ERROR_MESSAGE
-	    			);
-	    	return;
-	    }else if(leerTipoMaterial().equals("Herramientas") && (leerUnidadMedida().equals("Kg.") || leerUnidadMedida().equals("Cm.") || leerUnidadMedida().equals("Lt."))) {
-	    	JOptionPane.showMessageDialog(
-	    			this,
-	    			"Unidad de mediad invalida segun el tipo de material",
-	    			"ERROR",
-	    			JOptionPane.ERROR_MESSAGE
-	    			);
-	    	return;
-	    }else {
-	    	 try {
-	 	        Material nuevoMaterial = new Material(codigo, nombreMaterial, tipoMaterial, color, unidadMedida,cantidad,proveedor, fecha, hora);
-	 	        material.añadir(nuevoMaterial);
-	 	        txtFecha.setText(obtenerFecha());
-	 		    txtHora.setText(obtenerHora());
-	 	        listar();
-	 	        txtNombreMaterial.setText("");
-	 	        txtColor.setText("");
-	 	        txtProveedor.setText("");
-	 	        txtCantidad.setText("");
-	 	        txtCodigoMaterial.setText("" + material.codigoMaterial());
-	 	        txtNombreMaterial.requestFocus();
-	 	    } catch (Exception e) {
-	 	        error("Error al registrar el material.", txtNombreMaterial);
-	 	    }
-	    }  
+	void adicionarMaterial() {
+    String codigo = leerCodigoMaterial();
+    String nombreMaterial = leerNombreMaterial();
+    String tipoMaterial = leerTipoMaterial();
+    String color = leerColor();
+    String unidadMedida = leerUnidadMedida();
+    String fecha = obtenerFecha();
+    String hora = obtenerHora();
+    int cantidad = leerCantidad();
+    String proveedor = leerProveedor();
+
+    if (unidadInvalida(tipoMaterial, unidadMedida)) {
+        JOptionPane.showMessageDialog(this, "Unidad de medida inválida según el tipo de material", "ERROR", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    Material nuevoMaterial = new Material(codigo, nombreMaterial, tipoMaterial, color, unidadMedida, cantidad, proveedor, fecha, hora);
+    MaterialDAO dao = new MaterialDAO();
+    
+    
+    if (dao.insertarMaterial(nuevoMaterial)) {
+        mensaje("Material registrado exitosamente.");
+        limpiarCampos();
+        listar();  // actualiza tabla desde base de datos
+        txtCodigoMaterial.setText(new MaterialDAO().generarNuevoCodigoMaterial());  // genera nuevo código
+    } else {
+        error("Ocurrió un error al registrar el material.", txtNombreMaterial);
+    }
+	}
+	
+	boolean unidadInvalida(String tipo, String unidad) {
+	    return (tipo.equals("Materia prima textil") && (unidad.equals("Unid.") || unidad.equals("Lt."))) ||
+	           (tipo.equals("Insumos auxiliares") && (unidad.equals("Kg.") || unidad.equals("Cm."))) ||
+	           (tipo.equals("Empaque y etiqueta") && (unidad.equals("Kg.") || unidad.equals("Cm.") || unidad.equals("Lt."))) ||
+	           (tipo.equals("Químicos") && (unidad.equals("Kg.") || unidad.equals("Cm."))) ||
+	           (tipo.equals("Herramientas") && (unidad.equals("Kg.") || unidad.equals("Cm.") || unidad.equals("Lt.")));
+	}
+
+	boolean validarCamposObligatorios() {
+	    if (leerNombreMaterial().trim().isEmpty()) {
+	        error("El nombre del material no puede estar vacío.", txtNombreMaterial);
+	        return false;
+	    }
+	    if (leerProveedor().trim().isEmpty()) {
+	        error("El proveedor no puede estar vacío.", txtProveedor);
+	        return false;
+	    }
+	    if (txtCantidad.getText().trim().isEmpty()) {
+	        error("La cantidad no puede estar vacía.", txtCantidad);
+	        return false;
+	    }
+	    try {
+	        Integer.parseInt(txtCantidad.getText().trim());
+	    } catch (NumberFormatException e) {
+	        error("Ingrese una cantidad válida (solo números enteros).", txtCantidad);
+	        return false;
+	    }
+
+	    return true;
 	}
 
 	void mensaje(String s) {
@@ -353,17 +365,22 @@ public class DlgRegistroMateriales extends JDialog implements ActionListener {
 		return txtProveedor.getText().trim();
 	}
 	int leerCantidad() {
-		return Integer.parseInt(txtCantidad.getText().trim());
+	    String texto = txtCantidad.getText().trim();
+	    if (texto.isEmpty()) {
+	        throw new NumberFormatException("La cantidad está vacía");
+	    }
+	    return Integer.parseInt(texto);
 	}
+
 	String leerUnidadMedida() {
 		return (String )cmbUnidadMedida.getSelectedItem();
 	}
 	
 	String obtenerFecha() {
 		LocalDateTime fecha = LocalDateTime.now();
-		DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd-MM-yy");
-		String fechaActual = fecha.format(formato);
-		return fechaActual;
+	    DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	    return fecha.format(formato);
+
 	}
 	String obtenerHora() {
 		LocalDateTime hora = LocalDateTime.now();
