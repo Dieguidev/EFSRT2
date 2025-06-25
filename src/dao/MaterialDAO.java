@@ -234,5 +234,78 @@ public class MaterialDAO {
 	}
 
 
+	public List<String> obtenerCodigosMaterial() {
+	    List<String> codigos = new ArrayList<>();
+	    String sql = "SELECT CodMat FROM dbo.COMP_MATERIALES ORDER BY CodMat";
+
+	    try (Connection con = ConexionSQL.conectar();
+	         PreparedStatement ps = con.prepareStatement(sql);
+	         ResultSet rs = ps.executeQuery()) {
+
+	        while (rs.next()) {
+	            codigos.add(rs.getString("CodMat"));
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return codigos;
+	}
+
+	
+	public Material buscarMaterial(String codigo) {
+	    Material m = null;
+	    String sql = "SELECT * FROM dbo.COMP_MATERIALES WHERE CodMat = ?";
+
+	    try (Connection con = ConexionSQL.conectar();
+	         PreparedStatement ps = con.prepareStatement(sql)) {
+
+	        ps.setString(1, codigo);
+	        ResultSet rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            m = new Material(
+	                rs.getString("CodMat"),
+	                rs.getString("NomMat"),
+	                rs.getString("TipMat"),
+	                rs.getString("Color"),
+	                rs.getString("UnidMed"),
+	                rs.getInt("CantMat"),
+	                rs.getString("ProvMat"),
+	                rs.getString("Fecha"),
+	                rs.getString("Hora")
+	            );
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return m;
+	}
+	
+	public boolean actualizarMaterial(Material m) {
+	    String sql = "UPDATE dbo.COMP_MATERIALES SET NomMat=?, TipMat=?, Color=?, ProvMat=?, UnidMed=?, CantMat=? WHERE CodMat=?";
+
+	    try (Connection con = ConexionSQL.conectar();
+	         PreparedStatement ps = con.prepareStatement(sql)) {
+
+	        ps.setString(1, m.getNombreMaterial());
+	        ps.setString(2, m.getTipoMaterial());
+	        ps.setString(3, m.getColor());
+	        ps.setString(4, m.getProveedor());
+	        ps.setString(5, m.getUnidadMedida());
+	        ps.setInt(6, m.getCantidad());
+	        ps.setString(7, m.getCodigoMaterial());
+
+	        return ps.executeUpdate() > 0;
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+	}
+
 
 }

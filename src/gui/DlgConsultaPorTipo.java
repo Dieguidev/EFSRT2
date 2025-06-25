@@ -5,7 +5,7 @@ import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
-import arreglo.Materiales;
+
 import clases.Material;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;

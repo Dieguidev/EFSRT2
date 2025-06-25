@@ -1,7 +1,8 @@
 package gui;
 
-import arreglo.Materiales;
+
 import clases.Material;
+import dao.MaterialDAO;
 import gui.MenuPrincipal.DatosCompartidos;
 
 import java.awt.EventQueue;
@@ -40,6 +41,7 @@ public class DlgModificarMaterial extends JDialog implements ActionListener {
 	private JScrollPane scrollPane;
 	private JTable tblMateriales;
 	private DefaultTableModel modelo;
+	MaterialDAO dao = new MaterialDAO();
 	
 	/**
 	 * Launch the application.
@@ -141,7 +143,7 @@ public class DlgModificarMaterial extends JDialog implements ActionListener {
 		modelo.addColumn("Hora");
 		tblMateriales.setModel(modelo);
 		
-		cmbCodigo = new JComboBox<Integer>();
+		cmbCodigo = new JComboBox<String>();
 		cmbCodigo.setBounds(166, 10, 86, 22);
 		getContentPane().add(cmbCodigo);
 		
@@ -201,25 +203,26 @@ public class DlgModificarMaterial extends JDialog implements ActionListener {
 	}
 	
 	//  Declaración global
-	Materiales material = DatosCompartidos.materiales;
 	private JTextField txtCantidad;
 	private JTextField txtUnidadMedida;
 	private JTextField txtFecha;
 	private JTextField txtHora;
-	private JComboBox<Integer> cmbCodigo;
+	private JComboBox<String> cmbCodigo;
 	private JLabel lblHora;
 	private JLabel lblFecha;
 	private JLabel lblUnidadDeMedida;
 	private JLabel lblCantidad;
 	private JLabel lblMaterialesModificados;
 	private JComboBox<String> cmbTipoMaterial;
+
+
 	
 	private final String [] tiposMaterial = {
-		    "Materia prima textil",
-		    "Insumos auxiliares",
-		    "Empaque y etiqueta",
-		    "Químicos",
-		    "Herramientas"
+			"Herramientas",
+		    "Insumos Auxiliares",
+		    "Materia Prima",
+		    "Empaque y Etiqueta",
+		    "Quimicos"
 	};
 	
 	public void actionPerformed(ActionEvent arg0) {
@@ -248,32 +251,31 @@ public class DlgModificarMaterial extends JDialog implements ActionListener {
 		tcm.getColumn(8).setPreferredWidth(anchoColumna(4));  // Hora
 	}
 	void listar() {
-		Material m;
-		modelo.setRowCount(0);
-		for (int i=0; i<material.tamaño(); i++) {
-			m = material.obtener(i);
-			Object[] fila = { m.getCodigoMaterial(),
-					          m.getNombreMaterial(),
-					          m.getColor(),
-					          m.getTipoMaterial(),
-					          m.getProveedor(),
-					          m.getUnidadMedida(),
-					          m.getCantidad(),
-					          m.getFecha(),
-					          m.getHora()
-					         };
-			modelo.addRow(fila);
-		}
+	    modelo.setRowCount(0);
+	    MaterialDAO dao = new MaterialDAO();
+	    for (Material m : dao.listarMateriales()) {
+	        Object[] fila = {
+	            m.getCodigoMaterial(),
+	            m.getNombreMaterial(),
+	            m.getColor(),
+	            m.getTipoMaterial(),
+	            m.getProveedor(),
+	            m.getUnidadMedida(),
+	            m.getCantidad(),
+	            m.getFecha(),
+	            m.getHora()
+	        };
+	        modelo.addRow(fila);
+	    }
 	}
 	
 	void cargarCodigosMaterial() {
-	    cmbCodigo.removeAllItems();
-	    for (int i = 0; i < material.tamaño(); i++) {
-	        cmbCodigo.addItem(Integer.valueOf(material.obtener(i).getCodigoMaterial()));
+		cmbCodigo.removeAllItems();
+	    for (String cod : dao.obtenerCodigosMaterial()) {
+	        cmbCodigo.addItem(cod);
 	    }
-	    if (cmbCodigo.getItemCount() > 0) {
-	        btnBuscar.setEnabled(true);
-	    }
+	    btnBuscar.setEnabled(cmbCodigo.getItemCount() > 0);
+
 	}
 	void cargarTiposMaterial() {
 	    cmbTipoMaterial.removeAllItems();
@@ -282,72 +284,88 @@ public class DlgModificarMaterial extends JDialog implements ActionListener {
 	    }
 	}
 	void consultarMaterial() {
-		int codigo = leerCodigo();
-		Material m = material.buscarMaterial(codigo);
-		txtNombreMaterial.setText(m.getNombreMaterial());
-		cargarTiposMaterial();
-		txtColor.setText("" + m.getColor());
-		txtProveedor.setText("" + m.getProveedor());
-		txtCantidad.setText("" + m.getCantidad());
-		txtUnidadMedida.setText("" + m.getUnidadMedida());
-		txtFecha.setText("" + m.getFecha());
-		txtHora.setText("" + m.getHora());
-		//
+	    String codigo = leerCodigo();
+	    Material m = dao.buscarMaterial(codigo);
+
+	    cargarTiposMaterial(); // primero carga los valores válidos
+	    cmbTipoMaterial.setSelectedItem(m.getTipoMaterial()); // luego selecciona el que vino de la base
+
+	    txtNombreMaterial.setText(m.getNombreMaterial());
+	    txtColor.setText(m.getColor());
+	    txtProveedor.setText(m.getProveedor());
+	    txtCantidad.setText("" + m.getCantidad());
+	    txtUnidadMedida.setText(m.getUnidadMedida());
+	    txtFecha.setText(m.getFecha());
+	    txtHora.setText(m.getHora());
+
 	    txtNombreMaterial.setEditable(true);
 	    cmbTipoMaterial.setEditable(false);
 	    txtColor.setEditable(true);
 	    txtProveedor.setEditable(true);
 	    txtCantidad.setEditable(true);
 	    txtUnidadMedida.setEditable(true);
-		
 	}
 	
-	void modificarMaterial() {
-		if(leerNombreMaterial().isEmpty() || leerTipoMaterial().isEmpty() || leerProveedor().isEmpty()) {
-		    mensaje("Todos los campos deben estar llenos.");
-		    return;
-		}
-		try {
-			int codigo = leerCodigo();
-			Material m = material.buscarMaterial(codigo);
-			if (m != null) {
-				String nombre = leerNombreMaterial();
-				int cantidad = leerCantidad();
-				if (nombre.length() > 0)
-					try {
-						String tipoMaterial = leerTipoMaterial();
-						String unidadMedida = leerCantidadMedida();
-						try {
-							String color = leerColor();
-							String proveedor = leerProveedor();
-							m.setNombreMaterial(nombre);
-							m.setTipoMaterial(tipoMaterial);
-							m.setProveedor(proveedor);
-							m.setCantidad(cantidad);
-							m.setUnidadMedida(unidadMedida);
-							m.setColor(color);
-							listar();
-							txtNombreMaterial.requestFocus();
-						}
-						catch (Exception e) {
-							error("Ingrese NOMBRE correcto", txtNombreMaterial);
-						}	
-					}
-					catch (Exception e) {
-						mensaje("Ingrese TIPO DE MATERIAL correcto");
-					}
-				else
-					error("Ingrese la COLOR correcto", txtColor);
-			}
-			else
-				mensaje("El código " + codigo + " no existe");
-				cmbCodigo.requestFocus();
-		}
-		catch (Exception e) {
-			mensaje("Ingrese CÓDIGO correcto");
-			cmbCodigo.requestFocus();
-		}
+	boolean validarCamposModificar() {
+	    if (leerNombreMaterial().isEmpty()) {
+	        error("El nombre del material no puede estar vacío.", txtNombreMaterial);
+	        return false;
+	    }
+	    if (leerProveedor().isEmpty()) {
+	        error("El proveedor no puede estar vacío.", txtProveedor);
+	        return false;
+	    }
+	    if (txtCantidad.getText().trim().isEmpty()) {
+	        error("La cantidad no puede estar vacía.", txtCantidad);
+	        return false;
+	    }
+	    return true;
 	}
+
+	
+	void modificarMaterial() {
+    if (!validarCamposModificar()) {
+        return;
+    }
+
+    String codigo = leerCodigo();
+    Material m = dao.buscarMaterial(codigo);
+
+    if (m == null) {
+        mensaje("El código " + codigo + " no existe.");
+        cmbCodigo.requestFocus();
+        return;
+    }
+
+    String nombre = leerNombreMaterial();
+    String tipoMaterial = leerTipoMaterial();
+    String proveedor = leerProveedor();
+    String unidadMedida = leerCantidadMedida();
+    String color = leerColor();
+    int cantidad;
+
+    try {
+        cantidad = Integer.parseInt(txtCantidad.getText().trim());
+    } catch (NumberFormatException e) {
+        error("Ingrese una cantidad válida (número entero)", txtCantidad);
+        return;
+    }
+
+    m.setNombreMaterial(nombre);
+    m.setTipoMaterial(tipoMaterial);
+    m.setProveedor(proveedor);
+    m.setCantidad(cantidad);
+    m.setUnidadMedida(unidadMedida);
+    m.setColor(color);
+
+    if (dao.actualizarMaterial(m)) {
+        mensaje("Material actualizado exitosamente.");
+        listar();
+        limpiarCampos();
+    } else {
+        mensaje("Error al actualizar el material.");
+    }
+}
 	
 	void limpiarCampos() {
 		txtNombreMaterial.setText("");
@@ -369,8 +387,8 @@ public class DlgModificarMaterial extends JDialog implements ActionListener {
 	}
 
 	//  Métodos 
-	int leerCodigo() {
-		return (int) cmbCodigo.getSelectedItem();
+	String leerCodigo() {
+		return (String) cmbCodigo.getSelectedItem();
 	}
 	String leerNombreMaterial() {
 		return txtNombreMaterial.getText().trim();
