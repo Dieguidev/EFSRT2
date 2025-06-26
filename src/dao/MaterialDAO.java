@@ -306,6 +306,23 @@ public class MaterialDAO {
 	        return false;
 	    }
 	}
+	
+	
+	public boolean eliminarMaterial(String codigo) {
+	    String sql = "DELETE FROM dbo.COMP_MATERIALES WHERE CodMat = ?";
+
+	    try (Connection con = ConexionSQL.conectar();
+	         PreparedStatement ps = con.prepareStatement(sql)) {
+
+	        ps.setString(1, codigo);
+	        return ps.executeUpdate() > 0;
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+	}
+
 
 
 }

@@ -2,6 +2,7 @@ package gui;
 
 import arreglo.Materiales;
 import clases.Material;
+import dao.MaterialDAO;
 import gui.MenuPrincipal.DatosCompartidos;
 
 import java.awt.EventQueue;
@@ -149,7 +150,7 @@ public class DlgEliminarMaterial extends JDialog implements ActionListener {
 		modelo.addColumn("Hora");
 		tblMateriales.setModel(modelo);
 		
-		cmbCodigo = new JComboBox<Integer>();
+		cmbCodigo = new JComboBox<String>();
 		cmbCodigo.setBounds(166, 10, 86, 22);
 		getContentPane().add(cmbCodigo);
 		
@@ -204,17 +205,18 @@ public class DlgEliminarMaterial extends JDialog implements ActionListener {
 	}
 	
 	//  Declaración global
-	Materiales material = DatosCompartidos.materiales;
 	private JTextField txtCantidad;
 	private JTextField txtUnidadMedida;
 	private JTextField txtFecha;
 	private JTextField txtHora;
-	private JComboBox<Integer> cmbCodigo;
+	private JComboBox<String> cmbCodigo;
 	private JLabel lblHora;
 	private JLabel lblFecha;
 	private JLabel lblUnidadDeMedida;
 	private JLabel lblCantidad;
 	private JLabel lblMaterialesEliminados;
+	MaterialDAO dao = new MaterialDAO();
+
 	
 	public void actionPerformed(ActionEvent arg0) {
 		if (arg0.getSource() == btnEliminar) {
@@ -242,64 +244,68 @@ public class DlgEliminarMaterial extends JDialog implements ActionListener {
 		tcm.getColumn(8).setPreferredWidth(anchoColumna(4));  // Hora
 	}
 	void listar() {
-		Material m;
-		modelo.setRowCount(0);
-		for (int i=0; i<material.tamaño(); i++) {
-			m = material.obtener(i);
-			Object[] fila = { m.getCodigoMaterial(),
-					          m.getNombreMaterial(),
-					          m.getTipoMaterial(),
-					          m.getColor(),
-					          m.getProveedor(),
-					          m.getCantidad(),
-					          m.getUnidadMedida(),
-					          m.getFecha(),
-					          m.getHora()
-					         };
-			modelo.addRow(fila);
-		}
-	}
-	
+	    modelo.setRowCount(0);
+	    for (Material m : dao.listarMateriales()) {
+	        Object[] fila = {
+	            m.getCodigoMaterial(),
+	            m.getNombreMaterial(),
+	            m.getColor(),
+	            m.getTipoMaterial(),
+	            m.getProveedor(),
+	            m.getUnidadMedida(),
+	            m.getCantidad(),
+	            m.getFecha(),
+	            m.getHora()
+	        };
+	        modelo.addRow(fila);
+	    }
+	}	
 	void cargarCodigosMaterial() {
-	    cmbCodigo.removeAllItems();
-	    for (int i = 0; i < material.tamaño(); i++) {
-	        cmbCodigo.addItem(Integer.valueOf(material.obtener(i).getCodigoMaterial()));
+		cmbCodigo.removeAllItems();
+	    for (String cod : dao.obtenerCodigosMaterial()) {
+	        cmbCodigo.addItem(cod);
 	    }
-	    if (cmbCodigo.getItemCount() > 0) {
-	        btnBuscar.setEnabled(true);
-	    }
+	    btnBuscar.setEnabled(cmbCodigo.getItemCount() > 0);
+
 	}
 	void consultarMaterial() {
-		int codigo = leerCodigo();
-		Material m = material.buscarMaterial(codigo);
-		txtNombreMaterial.setText(m.getNombreMaterial());
-		txtTipoMaterial.setText("" + m.getTipoMaterial());
-		txtColor.setText("" + m.getColor());
-		txtProveedor.setText("" + m.getProveedor());
-		txtCantidad.setText("" + m.getCantidad());
-		txtUnidadMedida.setText("" + m.getUnidadMedida());
-		txtFecha.setText("" + m.getFecha());
-		txtHora.setText("" + m.getHora());
-		
+	    String codigo = leerCodigo();
+	    Material m = dao.buscarMaterial(codigo);
+	    if (m == null) {
+	        mensaje("El código no existe.");
+	        return;
+	    }
+
+	    txtNombreMaterial.setText(m.getNombreMaterial());
+	    txtTipoMaterial.setText(m.getTipoMaterial());
+	    txtColor.setText(m.getColor());
+	    txtProveedor.setText(m.getProveedor());
+	    txtCantidad.setText(String.valueOf(m.getCantidad()));
+	    txtUnidadMedida.setText(m.getUnidadMedida());
+	    txtFecha.setText(m.getFecha());
+	    txtHora.setText(m.getHora());
 	}
 	
 	void eliminarMaterial() {
-			int codigo = leerCodigo();
-			Material m = material.buscarMaterial(codigo);
-			int ok = confirmar("¿ Desea eliminar el registro ?");
-			if (ok == 0) {
-				material.eliminar(m);
-			    Object[] filaEliminada = {
-		                m.getCodigoMaterial(), m.getNombreMaterial(), m.getColor(),
-		                m.getTipoMaterial(), m.getProveedor(), m.getUnidadMedida(),
-		                m.getCantidad(), m.getFecha(), m.getHora()
-		            };
-		            modelo.addRow(filaEliminada);
+	    String codigo = leerCodigo();
+	    Material m = dao.buscarMaterial(codigo);
+	    if (m == null) {
+	        mensaje("No se encontró el material.");
+	        return;
+	    }
 
-		            limpiarCampos();
-		            cargarCodigosMaterial();
-			}
-		}
+	    int ok = confirmar("¿Desea eliminar el registro?");
+	    if (ok == 0) {
+	        if (dao.eliminarMaterial(codigo)) {
+	            mensaje("Material eliminado correctamente.");
+	            listar();
+	            cargarCodigosMaterial();
+	            limpiarCampos();
+	        } else {
+	            mensaje("Error al eliminar el material.");
+	        }
+	    }
+	}
 		
 	void limpiarCampos() {
 		txtNombreMaterial.setText("");
@@ -321,8 +327,8 @@ public class DlgEliminarMaterial extends JDialog implements ActionListener {
 		txt.requestFocus();
 	}
 	//  Métodos que retornan valor (sin parámetros)
-	int leerCodigo() {
-		return (int) cmbCodigo.getSelectedItem();
+	String leerCodigo() {
+		return (String) cmbCodigo.getSelectedItem();
 	}
 	String leerNombreMaterial() {
 		return txtNombreMaterial.getText().trim();
